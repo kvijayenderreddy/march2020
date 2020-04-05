@@ -10,7 +10,12 @@ a - append mode
 # info to write
 
 def writefile():
-    list = [1000, 2000, 3000]
+    list = [1000, 2000, 3000, 4444, 6666, "dfadsfsa", "fsdfsdf"]
+    '''
+    1000 is int or number
+    '1000' is string
+    
+    '''
 
     file = open("test.txt", 'w')
 
