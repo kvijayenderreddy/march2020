@@ -1,4 +1,8 @@
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+from SampleScripts_OR.ObjectRepo import ObjectRepository
+from SampleScripts_ComUtils.CommonUtilities import ComUtils
 import time
 
 class OHRM():
@@ -7,11 +11,29 @@ class OHRM():
         self.driver = webdriver.Chrome(executable_path="C:\\Users\\USER\\PycharmProjects\\March2020\\drivers\\chromedriver.exe")
 
     def loginToApplication(self, username, password):
+        OR = ObjectRepository()
+        CU = ComUtils()
         self.driver.get("https://opensource-demo.orangehrmlive.com/")
-        self.driver.find_element_by_name("txtUsername").send_keys(username)
-        self.driver.find_element_by_name("txtPassword").send_keys(password)
-        self.driver.find_element_by_name("Submit").click()
-        if(self.driver.find_element_by_id("welcome").is_displayed()):
+        # self.driver.find_element_by_name("txtUsername").send_keys(username)
+        # self.driver.find_element_by_name("txtPassword").send_keys(password)
+        # self.driver.find_element_by_name("Submit").click()
+
+        # with Object repository
+        # self.driver.find_element_by_name(OR.usernameTxt_name).send_keys(username)
+        # self.driver.find_element_by_name(OR.passwordTxt_name).send_keys(password)
+        # self.driver.find_element_by_name(OR.submitBtn_name).click()
+
+        # with different way of element actions - using find_element(param1, param2)
+        # self.driver.find_element(By.NAME, OR.usernameTxt_name).send_keys(username)
+        # self.driver.find_element(By.NAME, OR.passwordTxt_name).send_keys(password)
+        # self.driver.find_element(By.NAME, OR.submitBtn_name).click()
+
+        # with different way of element actions - Using CommonUtilities
+        CU.passTextToElement(By.NAME, OR.usernameTxt_name, username, self.driver)
+        CU.passTextToElement(By.NAME, OR.passwordTxt_name, password, self.driver)
+        CU.clickElements(By.NAME, OR.submitBtn_name, self.driver)
+        # if(self.driver.find_element_by_id("welcome").is_displayed()):
+        if(CU.checkElementDisplayed((By.ID), "welcome", self.driver) == True):
             print("User Logged in Successfully")
             return True
         else:
@@ -37,11 +59,31 @@ class OHRM():
             print("User Could NOT LOGOUT of the application")
             return False
 
+    def fetchGeneralInformationPageDetails(self):
+        self.driver.get("https://opensource-demo.orangehrmlive.com/index.php/admin/viewOrganizationGeneralInformation")
+        genInfoPageVisible = self.driver.find_element_by_id("genInfoHeading").is_displayed()
+        if(genInfoPageVisible == True):
+            # orgName = self.driver.find_element_by_xpath("//label[@for='organization_name']").text
+            # orgEmail = self.driver.find_element_by_xpath("//label[@for='organization_email']").text
+            orgName = self.driver.find_element_by_id("organization_name").get_attribute("value")
+            orgEmail = self.driver.find_element_by_id("organization_email").get_attribute("value")
+            # orgCountry = self.driver.find_element_by_id("organization_country").get_attribute("value")
+            orgCountry = self.driver.find_element_by_xpath("//option[@selected='selected']").text
+            pageDetails = "Page details:\nOrganization Name: " + orgName \
+                          + "\nOrganization Email: " + orgEmail \
+                          + "\nOrganization Country: " + orgCountry
+            # print(pageDetails)
+            return pageDetails
+        else:
+            print("Page not loaded")
+            return ""
+
 o = OHRM()
 if (o.loginToApplication("admin", "admin123")):
-    print(o.QuickStartNavigation("Abwesenheiten zuweisen"))
-    print(o.QuickStartNavigation("Abwesenheitsübersicht (pro Mitarbeiter)"))
-    print(o.QuickStartNavigation("Zeiterfassung"))
+    # print(o.QuickStartNavigation("Abwesenheiten zuweisen"))
+    # print(o.QuickStartNavigation("Abwesenheitsübersicht (pro Mitarbeiter)"))
+    # print(o.QuickStartNavigation("Zeiterfassung"))
+    print(o.fetchGeneralInformationPageDetails())
     o.logout()
 else:
     print(">>> Login Unsuccessful")
